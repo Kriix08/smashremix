@@ -35,7 +35,7 @@ scope VsStats {
     current_page:
     db      0x00
 
-    constant TOTAL_PAGES(1)
+    constant TOTAL_PAGES(2)
     constant PAGE1_GROUP(0x1A)  // randomly chosen group, supports up to 7 pages before running out of space
 
     // @ Description
@@ -54,6 +54,7 @@ scope VsStats {
     max_combo_hits_vs:; db "Longest Combo VS", 0x00
     max_combo_hits_taken:; db "Max Hits Taken", 0x00
     max_combo_damage_taken:; db "Max Damage Taken", 0x00
+    other_stats:; db "Other Stats", 0x00
     dash:; db "-", 0x00
     press_b:; db ": Back", 0x00
     press_r:; db ": Next Page", 0x00
@@ -797,9 +798,9 @@ scope VsStats {
         Render.draw_string(0x1F, 0x0E, press_b, Render.NOOP, 0x420B0000, 0x417F0000, 0xFFFFFFFF, 0x3F500000, Render.alignment.LEFT, OS.FALSE)
         Render.draw_texture_at_offset(0x1F, 0x0E, Render.file_pointer_1, Render.file_c5_offsets.B, Render.NOOP, 0x41B40000, 0x41600000, 0x00D040FF, 0x003000FF, 0x3F800000)
 
-        //// R: Next Page upper left
-        //Render.draw_string(0x1F, 0x0E, press_r, Render.NOOP, 0x42AE0000, 0x417F0000, 0xFFFFFFFF, 0x3F500000, Render.alignment.LEFT, OS.FALSE)
-        //Render.draw_texture_at_offset(0x1F, 0x0E, Render.file_pointer_1, Render.file_c5_offsets.R, Render.NOOP, 0x428F0000, 0x41700000, 0x848484FF, 0x303030FF, 0x3F700000)
+        // R: Next Page upper left
+        Render.draw_string(0x1F, 0x0E, press_r, Render.NOOP, 0x42AE0000, 0x417F0000, 0xFFFFFFFF, 0x3F500000, Render.alignment.LEFT, OS.FALSE)
+        Render.draw_texture_at_offset(0x1F, 0x0E, Render.file_pointer_1, Render.file_c5_offsets.R, Render.NOOP, 0x428F0000, 0x41700000, 0x848484FF, 0x303030FF, 0x3F700000)
 
         // Player port headers
         jal     draw_port_headers_
@@ -826,7 +827,7 @@ scope VsStats {
         nop
 
         _combo_stats_off:
-        b       _end                        // skip drawing combo stats if combo meter toggle is off
+        b       _page_2                     // skip drawing combo stats if combo meter toggle is off
         nop
 
         _combo_stats_on_check:
@@ -845,11 +846,14 @@ scope VsStats {
         draw_row(max_combo_hits_taken, 0, ComboMeter.combo_struct_p1, 0x0004, 0x0038, -1, -1, 0)
         draw_row(max_combo_damage_taken, 0, ComboMeter.combo_struct_p1, 0x0008, 0x0038, -1, -1, 0)
 
-        //// Page 2
-        //_page_2:
-        //// Draw lines
-        //checkerboard_stripe()               // continue checkerboard stripe pattern between pages
-        //lli     a2, 30                      // a2 = start y
+        // Page 2 example
+        _page_2:
+        // Draw lines
+        checkerboard_stripe()               // continue checkerboard stripe pattern between pages
+        lli     a2, 30                      // a2 = start y
+        draw_header(other_stats, 1)
+        addiu   a2, a2, -1                  // adjust y for better underline
+        draw_underline(64, 1)
 
         // Hide stat groups so they aren't visible when first entering results screen
         _end:
