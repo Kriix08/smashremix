@@ -36,7 +36,7 @@ scope VsStats {
     db      0x00
 
     constant TOTAL_PAGES(1)
-    constant PAGE1_GROUP(0x19)  // randomly chosen group, supports up to 8 pages before running out of space
+    constant PAGE1_GROUP(0x1A)  // randomly chosen group, supports up to 7 pages before running out of space
 
     // @ Description
     // Strings used
@@ -182,7 +182,7 @@ scope VsStats {
         li      a0, {table}                 // a0 = address of table
         addiu   a0, a0, {offset}            // a0 = address of value
         lli     a1, {struct_size}           // a1 = size of struct
-        lli     t7, {page}                  // t7 = ~
+        lli     t7, {page}                  // t7 = page
         addiu   t7, t7, PAGE1_GROUP         // t7 = group for page
         // a2 = y
         jal     draw_line_
@@ -373,7 +373,7 @@ scope VsStats {
         xori    a1, a1, 0x0001              // 0 -> 1 or 1 -> 0 (flip bool)
         sb      a1, 0x0018(sp)              // save flipped value to use again next page
         li      a0, stripe_on               // a0 = stripe_on
-        sb      a1, 0x0000(a0)              // save flipped value for this page
+        sb      a1, 0x0000(a0)              // save flipped value
     }
 
     // @ Description
@@ -582,7 +582,7 @@ scope VsStats {
 
         lli     a0, 0x0E                                 // a0 = group of stats instructions + port headers
         jal     Render.toggle_group_display_
-        lli     a1, 0x0000                               // a1 = 1 -> turn on this display list
+        lli     a1, 0x0000                               // a1 = 0 -> turn on this display list
 
         lli     a0, PAGE1_GROUP                          // a0 = group of stats (page 1)
         li      a1, current_page                         // ~
@@ -641,14 +641,14 @@ scope VsStats {
 
         // Loop to turn off all stat pages
         _loop_page_off_b:
-        sltu    at, a2, a0                  // at = 0 if next group > TOTAL_PAGES group
-        bnez    at, _end                    // if all pages turned off, don't loop
+        sltu    at, a2, a0                               // at = 0 if next group > TOTAL_PAGES group
+        bnez    at, _end                                 // if all pages turned off, don't loop
         nop
         jal     Render.toggle_group_display_
-        lli     a1, 0x0001                  // a1 = 1 -> turn off this display list
+        lli     a1, 0x0001                               // a1 = 1 -> turn off this display list
 
         b       _loop_page_off_b
-        addiu   a0, a0, 0x0001              // increment next group and loop
+        addiu   a0, a0, 0x0001                           // increment next group and loop
 
         // check for r press
         _check_r:
