@@ -67,6 +67,8 @@ scope VsStats {
     up_special:; db "Up Specials used", 0x00
     neutral_special:; db "Neutral Specials used", 0x00
     down_special:; db "Down Specials used", 0x00
+    grab_stats:; db "Grab Stats", 0x00
+    attempted_grabs:; db "Attempted grabs", 0x00
     dash:; db "-", 0x00
     press_b:; db ": Back", 0x00
     press_r:; db ": Next Page", 0x00
@@ -971,6 +973,12 @@ scope VsStats {
         // Draw lines
         checkerboard_stripe()               // continue checkerboard stripe pattern between pages
         lli     a2, 30                      // a2 = start y
+        draw_header(grab_stats, 2)
+        addiu   a2, a2, -1                  // adjust y for better underline
+        draw_underline(58, 2)
+        draw_row(attempted_grabs, 0, VsStats.grab_counter, 0x0000, 0x0004, -1, -1, 2)
+
+        addiu   a2, a2, 5                   // adjust y for cleaner spacing
         draw_header(airdodge_stats, 2)
         addiu   a2, a2, -1                  // adjust y for better underline
         draw_underline(86, 2)
@@ -1103,6 +1111,11 @@ scope VsStats {
         sw      r0, 0x0004(t8)          // clear p2 count
         sw      r0, 0x0008(t8)          // clear p3 count
         sw      r0, 0x000C(t8)          // clear p4 count
+        li      t8, VsStats.grab_counter
+        sw      r0, 0x0000(t8)          // clear p1 count
+        sw      r0, 0x0004(t8)          // clear p2 count
+        sw      r0, 0x0008(t8)          // clear p3 count
+        sw      r0, 0x000C(t8)          // clear p4 count
 
         _end:
         lw      ra, 0x0004(sp)              // restore ra
@@ -1128,6 +1141,32 @@ scope VsStats {
     dw  0x00 // p2
     dw  0x00 // p3
     dw  0x00 // p4
+
+    grab_counter:
+    dw  0x00 // p1
+    dw  0x00 // p2
+    dw  0x00 // p3
+    dw  0x00 // p4
+
+    scope count_grabs: {
+        OS.patch_start(0xC4600, 0x80149BC0)
+        j   count_grabs
+        nop
+        _return:
+        OS.patch_end()
+
+        li      a2, VsStats.grab_counter
+        lbu     a1, 0x000D(s0)          // a1 = player index (0 - 3)
+        sll     a1, a1, 0x0002          // a1 = player index * 4
+        addu    a2, a2, a1              // a2 = address of ledge grab count for this player
+        lw      a1, 0x0000(a2)          // a1 = ledge grab count
+        addiu   a1, a1, 0x0001          // increment
+        sw      a1, 0x0000(a2)          // store updated ledge grab count
+
+        addiu   a1, r0, 0x00A6  // original line 1
+        j   _return
+        addiu   a2, r0, 0x0000  // original line 2
+    }
 }
 
 } // __VSSTATS__
