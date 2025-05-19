@@ -59,6 +59,8 @@ scope VsStats {
     stat_success:; db "Successful", 0x00
     stat_missed:; db "Missed", 0x00
     tech_stats:; db "Tech Stats", 0x00
+    ledge_stats:; db "Ledge Stats", 0x00
+    times_grabbed:; db "Times grabbed", 0x00
     dash:; db "-", 0x00
     press_b:; db ": Back", 0x00
     press_r:; db ": Next Page", 0x00
@@ -943,6 +945,12 @@ scope VsStats {
         draw_row(stat_success, 8, WallTeching.successful_techs, 0x0000, 0x0004, -1, -1, 1)
         draw_row(stat_missed, 8, WallTeching.missed_techs, 0x0000, 0x0004, -1, -1, 1)
 
+        addiu   a2, a2, 5                   // adjust y for cleaner spacing
+        draw_header(ledge_stats, 1)
+        addiu   a2, a2, -1                  // adjust y for better underline
+        draw_underline(65, 1)
+        draw_row(times_grabbed, 0, LedgeTrump.ledges_grabbed, 0x0000, 0x0004, -1, -1, 1)
+
 
         // Hide stat groups so they aren't visible when first entering results screen
         _end:
@@ -1041,6 +1049,11 @@ scope VsStats {
         sw      r0, 0x0008(t8)          // clear p3 count
         sw      r0, 0x000C(t8)          // clear p4 count
         li      t8, WallTeching.missed_techs
+        sw      r0, 0x0000(t8)          // clear p1 count
+        sw      r0, 0x0004(t8)          // clear p2 count
+        sw      r0, 0x0008(t8)          // clear p3 count
+        sw      r0, 0x000C(t8)          // clear p4 count
+        li      t8, LedgeTrump.ledges_grabbed
         sw      r0, 0x0000(t8)          // clear p1 count
         sw      r0, 0x0004(t8)          // clear p2 count
         sw      r0, 0x0008(t8)          // clear p3 count
