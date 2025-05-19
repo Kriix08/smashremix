@@ -58,6 +58,7 @@ scope VsStats {
     stat_percent:; db "Success %", 0x00
     stat_success:; db "Successful", 0x00
     stat_missed:; db "Missed", 0x00
+    tech_stats:; db "Tech Stats", 0x00
     dash:; db "-", 0x00
     press_b:; db ": Back", 0x00
     press_r:; db ": Next Page", 0x00
@@ -84,9 +85,10 @@ scope VsStats {
             dw      0x00                                 // 0x0018 = total_damage_given
             dw      0x00                                 // 0x001C = highest_damage
             dw      0x00                                 // 0x0020 = percentage_z_cancel
+            dw      0x00                                 // 0x0024 = percentage_tech
         }
     }
-    constant STATS_STRUCT_SIZE(0x24)
+    constant STATS_STRUCT_SIZE(0x28)
 
     // Create stats structs
     stats_struct(1)
@@ -107,6 +109,7 @@ scope VsStats {
         sw      r0, 0x0018(t2)                           // total_damage_given = 0
         sw      r0, 0x001C(t2)                           // highest_damage = 0
         sw      r0, 0x0020(t2)                           // percentage_z_cancel = 0
+        sw      r0, 0x0024(t2)                           // percentage_tech = 0
     }
 
     // @ Description
@@ -389,6 +392,39 @@ scope VsStats {
         div.s   f4, f0, f2                               // f4 = f0 (successful * 100) / f2 (failed + successful)
         cvt.w.s f0, f4                                   // f4 = z-cancel success rate as word
         swc1    f0, 0x0020(t{port})                      // store percentage
+
+        // tech percentage:
+        li      t0, WallTeching.successful_techs         // t0 = successful techs
+        lli     t5, {port}                               // t5 = port 1-4
+        addiu   t5, t5, -0x0001                          // t5 = port 0-3
+        sll     t5, t5, 0x0002                           // t5 = port index * 4
+        addu    t0, t0, t5                               // t0 = address of successful techs for this port
+        lw      t0, 0x0000(t0)                           // t0 = successful techs for this port
+        mtc1    t0, f0                                   // ~
+        cvt.s.w f0, f0                                   // f0 = successful techs, fp
+
+        li      t0, WallTeching.missed_techs             // t0 = missed techs
+        lli     t5, {port}                               // t5 = port 1-4
+        addiu   t5, t5, -0x0001                          // t5 = port 0-3
+        sll     t5, t5, 0x0002                           // t5 = port index * 4
+        addu    t0, t0, t5                               // t0 = address of missed techs for this port
+        lw      t0, 0x0000(t0)                           // t0 = missed techs for this port
+        mtc1    t0, f4                                   // ~
+        cvt.s.w f4, f4                                   // f4 = missed techs, fp
+
+        add.s   f2, f0, f4                               // f2 = total amount of techs (hit+missed)
+        mtc1    r0, f4                                   // ~
+        c.le.s  f2, f4                                   // ~
+        nop
+        bc1t    pc()+32                                  // branch to end if there have been 0 techs in total
+        nop
+
+        lui     t0, 0x42C8                               // ~
+        mtc1    t0, f4                                   // f4 = 100.0
+        mul.s   f0, f0, f4                               // f0 = successful techs * 100.0
+        div.s   f4, f0, f2                               // f4 = f0 (successful * 100) / f2 (failed + successful)
+        cvt.w.s f0, f4                                   // f4 = techs success rate as word
+        swc1    f0, 0x0024(t{port})                      // store percentage
     }
 
     // @ Description
@@ -899,6 +935,14 @@ scope VsStats {
         draw_row(stat_success, 8, ZCancel.successful_z_cancels, 0x0000, 0x0004, -1, -1, 1)
         draw_row(stat_missed, 8, ZCancel.missed_z_cancels, 0x0000, 0x0004, -1, -1, 1)
 
+        addiu   a2, a2, 5                   // adjust y for cleaner spacing
+        draw_header(tech_stats, 1)
+        addiu   a2, a2, -1                  // adjust y for better underline
+        draw_underline(58, 1)
+        draw_row(stat_percent, 0, stats_struct_p1, 0x0024, 0x0028, -1, -1, 1)
+        draw_row(stat_success, 8, WallTeching.successful_techs, 0x0000, 0x0004, -1, -1, 1)
+        draw_row(stat_missed, 8, WallTeching.missed_techs, 0x0000, 0x0004, -1, -1, 1)
+
 
         // Hide stat groups so they aren't visible when first entering results screen
         _end:
@@ -987,6 +1031,16 @@ scope VsStats {
         sw      r0, 0x0008(t8)          // clear p3 count
         sw      r0, 0x000C(t8)          // clear p4 count
         li      t8, ZCancel.missed_z_cancels
+        sw      r0, 0x0000(t8)          // clear p1 count
+        sw      r0, 0x0004(t8)          // clear p2 count
+        sw      r0, 0x0008(t8)          // clear p3 count
+        sw      r0, 0x000C(t8)          // clear p4 count
+        li      t8, WallTeching.successful_techs
+        sw      r0, 0x0000(t8)          // clear p1 count
+        sw      r0, 0x0004(t8)          // clear p2 count
+        sw      r0, 0x0008(t8)          // clear p3 count
+        sw      r0, 0x000C(t8)          // clear p4 count
+        li      t8, WallTeching.missed_techs
         sw      r0, 0x0000(t8)          // clear p1 count
         sw      r0, 0x0004(t8)          // clear p2 count
         sw      r0, 0x0008(t8)          // clear p3 count
