@@ -54,7 +54,10 @@ scope VsStats {
     max_combo_hits_vs:; db "Longest Combo VS", 0x00
     max_combo_hits_taken:; db "Max Hits Taken", 0x00
     max_combo_damage_taken:; db "Max Damage Taken", 0x00
-    other_stats:; db "Other Stats", 0x00
+    z_cancel_stats:; db "Z-Cancel Stats", 0x00
+    stat_percent:; db "Success %", 0x00
+    stat_success:; db "Successful", 0x00
+    stat_missed:; db "Missed", 0x00
     dash:; db "-", 0x00
     press_b:; db ": Back", 0x00
     press_r:; db ": Next Page", 0x00
@@ -80,9 +83,10 @@ scope VsStats {
             dw      0x00                                 // 0x0014 = total_damage_taken
             dw      0x00                                 // 0x0018 = total_damage_given
             dw      0x00                                 // 0x001C = highest_damage
+            dw      0x00                                 // 0x0020 = percentage_z_cancel
         }
     }
-    constant STATS_STRUCT_SIZE(0x20)
+    constant STATS_STRUCT_SIZE(0x24)
 
     // Create stats structs
     stats_struct(1)
@@ -102,6 +106,7 @@ scope VsStats {
         sw      r0, 0x0014(t2)                           // total_damage_taken = 0
         sw      r0, 0x0018(t2)                           // total_damage_given = 0
         sw      r0, 0x001C(t2)                           // highest_damage = 0
+        sw      r0, 0x0020(t2)                           // percentage_z_cancel = 0
     }
 
     // @ Description
@@ -351,6 +356,39 @@ scope VsStats {
         // total damage given:
         lw      t5, 0x0034(t0)                           // t3 = total damage given during match
         sw      t5, 0x0018(t{port})                      // store total damage given
+
+        // z cancel percentage:
+        li      t0, ZCancel.successful_z_cancels         // t0 = successful z cancels
+        lli     t5, {port}                               // t5 = port 1-4
+        addiu   t5, t5, -0x0001                          // t5 = port 0-3
+        sll     t5, t5, 0x0002                           // t5 = port index * 4
+        addu    t0, t0, t5                               // t0 = address of successful z-cancels for this port
+        lw      t0, 0x0000(t0)                           // t0 = successful z-cancels for this port
+        mtc1    t0, f0                                   // ~
+        cvt.s.w f0, f0                                   // f0 = successful z-cancels, fp
+
+        li      t0, ZCancel.missed_z_cancels             // t0 = missed z cancels
+        lli     t5, {port}                               // t5 = port 1-4
+        addiu   t5, t5, -0x0001                          // t5 = port 0-3
+        sll     t5, t5, 0x0002                           // t5 = port index * 4
+        addu    t0, t0, t5                               // t0 = address of missed z-cancels for this port
+        lw      t0, 0x0000(t0)                           // t0 = missed z-cancels for this port
+        mtc1    t0, f4                                   // ~
+        cvt.s.w f4, f4                                   // f4 = missed z-cancels, fp
+
+        add.s   f2, f0, f4                               // f2 = total amount of z-cancels (hit+missed)
+        mtc1    r0, f4                                   // ~
+        c.le.s  f2, f4                                   // ~
+        nop
+        bc1t    pc()+32                                  // branch to end if there have been 0 z-cancels in total
+        nop
+
+        lui     t0, 0x42C8                               // ~
+        mtc1    t0, f4                                   // f4 = 100.0
+        mul.s   f0, f0, f4                               // f0 = successful z-cancels * 100.0
+        div.s   f4, f0, f2                               // f4 = f0 (successful * 100) / f2 (failed + successful)
+        cvt.w.s f0, f4                                   // f4 = z-cancel success rate as word
+        swc1    f0, 0x0020(t{port})                      // store percentage
     }
 
     // @ Description
@@ -374,7 +412,7 @@ scope VsStats {
         xori    a1, a1, 0x0001              // 0 -> 1 or 1 -> 0 (flip bool)
         sb      a1, 0x0018(sp)              // save flipped value to use again next page
         li      a0, stripe_on               // a0 = stripe_on
-        sb      a1, 0x0000(a0)              // save flipped value
+        sb      a1, 0x0000(a0)              // save flipped value for this page
     }
 
     // @ Description
@@ -817,13 +855,13 @@ scope VsStats {
         addiu   a2, a2, -1                  // adjust y for better underline
         draw_underline(75, 0)
         draw_header(damage_dealt_to, 0)
-        draw_row(p1, 8, stats_struct_p1, 0x0004, 0x0020, 0, 0, 0)
-        draw_row(p2, 8, stats_struct_p1, 0x0008, 0x0020, 1, 1, 0)
-        draw_row(p3, 8, stats_struct_p1, 0x000C, 0x0020, 2, 2, 0)
-        draw_row(p4, 8, stats_struct_p1, 0x0010, 0x0020, 3, 3, 0)
-        draw_row(total_damage_given, 0, stats_struct_p1, 0x0018, 0x0020, -1, -1, 0)
-        draw_row(total_damage_taken, 0, stats_struct_p1, 0x0014, 0x0020, -1, -1, 0)
-        draw_row(highest_damage, 0, stats_struct_p1, 0x001C, 0x0020, -1, -1, 0)
+        draw_row(p1, 8, stats_struct_p1, 0x0004, 0x0028, 0, 0, 0)
+        draw_row(p2, 8, stats_struct_p1, 0x0008, 0x0028, 1, 1, 0)
+        draw_row(p3, 8, stats_struct_p1, 0x000C, 0x0028, 2, 2, 0)
+        draw_row(p4, 8, stats_struct_p1, 0x0010, 0x0028, 3, 3, 0)
+        draw_row(total_damage_given, 0, stats_struct_p1, 0x0018, 0x0028, -1, -1, 0)
+        draw_row(total_damage_taken, 0, stats_struct_p1, 0x0014, 0x0028, -1, -1, 0)
+        draw_row(highest_damage, 0, stats_struct_p1, 0x001C, 0x0028, -1, -1, 0)
 
         b       _combo_stats_on_check
         nop
@@ -833,7 +871,7 @@ scope VsStats {
         nop
 
         _combo_stats_on_check:
-        // If combo meter is off, skip to _end and don't draw combo stats section
+        // If combo meter is off, skip to page 2 and don't draw combo stats section
         Toggles.guard(Toggles.entry_combo_meter, _combo_stats_off)
 
         addiu   a2, a2, 5                   // adjust y for cleaner spacing
@@ -848,14 +886,19 @@ scope VsStats {
         draw_row(max_combo_hits_taken, 0, ComboMeter.combo_struct_p1, 0x0004, 0x0038, -1, -1, 0)
         draw_row(max_combo_damage_taken, 0, ComboMeter.combo_struct_p1, 0x0008, 0x0038, -1, -1, 0)
 
-        // Page 2 example
+
+        // Page 2
         _page_2:
         // Draw lines
         checkerboard_stripe()               // continue checkerboard stripe pattern between pages
         lli     a2, 30                      // a2 = start y
-        draw_header(other_stats, 1)
+        draw_header(z_cancel_stats, 1)
         addiu   a2, a2, -1                  // adjust y for better underline
-        draw_underline(64, 1)
+        draw_underline(80, 1)
+        draw_row(stat_percent, 0, stats_struct_p1, 0x0020, 0x0028, -1, -1, 1)
+        draw_row(stat_success, 8, ZCancel.successful_z_cancels, 0x0000, 0x0004, -1, -1, 1)
+        draw_row(stat_missed, 8, ZCancel.missed_z_cancels, 0x0000, 0x0004, -1, -1, 1)
+
 
         // Hide stat groups so they aren't visible when first entering results screen
         _end:
@@ -926,6 +969,28 @@ scope VsStats {
         collect_stats_midmatch(2)           // collect midmatch stats for p2
         collect_stats_midmatch(3)           // collect midmatch stats for p3
         collect_stats_midmatch(4)           // collect midmatch stats for p4
+
+        _end:
+        lw      ra, 0x0004(sp)              // restore ra
+        addiu   sp, sp, 0x0010              // deallocate stack space
+        jr      ra
+        nop
+    }
+
+    scope tracker_setup_: {
+        addiu   sp, sp, -0x0010             // allocate stack space
+        sw      ra, 0x0004(sp)              // save ra
+
+        li      t8, ZCancel.successful_z_cancels
+        sw      r0, 0x0000(t8)          // clear p1 count
+        sw      r0, 0x0004(t8)          // clear p2 count
+        sw      r0, 0x0008(t8)          // clear p3 count
+        sw      r0, 0x000C(t8)          // clear p4 count
+        li      t8, ZCancel.missed_z_cancels
+        sw      r0, 0x0000(t8)          // clear p1 count
+        sw      r0, 0x0004(t8)          // clear p2 count
+        sw      r0, 0x0008(t8)          // clear p3 count
+        sw      r0, 0x000C(t8)          // clear p4 count
 
         _end:
         lw      ra, 0x0004(sp)              // restore ra

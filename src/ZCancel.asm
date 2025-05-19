@@ -35,6 +35,14 @@ scope ZCancel {
         _cruel_z_cancel_return:
         OS.patch_end()
 
+        li      at, ZCancel.missed_z_cancels
+        lbu     t8, 0x000D(v1)              // t8 = player index (0 - 3)
+        sll     t8, t8, 0x0002              // t8 = player index * 4
+        addu    at, at, t8                  // at = address of missed z-cancels for this player
+        lw      t8, 0x0000(at)              // t8 = missed z-cancel count
+        addiu   t8, t8, 0x0001              // increment
+        sw      t8, 0x0000(at)              // store updated z-cancel count
+
         OS.read_word(Toggles.entry_punish_on_failed_z_cancel + 0x4, t8) // t8 = failed z cancel toggle
         beqz    t8, _end                 // branch if no extra punishment
         lw      t9, 0x0028(v1)           // original line 2
@@ -249,6 +257,14 @@ scope ZCancel {
 
         _z_cancel_success:
         // bnezl   at, 0x80150AC0       // original line 1 (need to 'j' instead of 'b')
+        li      at, ZCancel.successful_z_cancels
+        lbu     t6, 0x000D(s1)              // t6 = player index (0 - 3)
+        sll     t6, t6, 0x0002              // t6 = player index * 4
+        addu    at, at, t6                  // at = address of successful z-cancels for this player
+        lw      t6, 0x0000(at)              // t6 = successful z-cancel count
+        addiu   t6, t6, 0x0001              // increment
+        sw      t6, 0x0000(at)              // store updated z-cancel count
+
         j       0x80150AC0              // original line 1, modified
         lui     at, 0xC1A0              // original line 2
 
@@ -293,6 +309,17 @@ scope ZCancel {
         nop
     }
 
+    missed_z_cancels:
+    dw  0x00 // p1
+    dw  0x00 // p2
+    dw  0x00 // p3
+    dw  0x00 // p4
+
+    successful_z_cancels:
+    dw  0x00 // p1
+    dw  0x00 // p2
+    dw  0x00 // p3
+    dw  0x00 // p4
 }
 
 }
