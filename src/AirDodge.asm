@@ -124,7 +124,7 @@ scope AirDodge {
         OS.read_word(Toggles.entry_air_dodge + 0x4, at)   // at = toggle
         beqz    at, _normal
         addiu   at, r0, Character.id.BOSS
-        
+
         // master hand check
         beq     at, v0, _normal     // skip air dodge if character = MASTER HAND
         // check if not already in special fall
@@ -132,7 +132,7 @@ scope AirDodge {
         addiu   at, r0, Action.FallSpecial
         beq     v0, at, _normal     // no air dodge if in special fall
         nop
-        
+
         _do_air_dodge:
         jal     initial_
         nop
@@ -140,7 +140,7 @@ scope AirDodge {
         _exit:
         j       0x80140328          // exit jump check routine
         lw      ra, 0x0014(sp)
-        
+
         _normal:
         jal     0x800F3794          // og line 1
         lw      a2, 0x001C(sp)      // restore a2
@@ -169,6 +169,17 @@ scope AirDodge {
         // if here, air dodge
         jal     air_dodge_initial_
         nop
+
+        // update air dodge counter
+        li      at, AirDodge.airdodge_count
+        lw      t0, 0x0084(a0)              // t0 = player struct
+        lbu     t0, 0x000D(t0)              // t0 = player index (0 - 3)
+        sll     t0, t0, 0x0002              // t0 = player index * 4
+        addu    at, at, t0                  // at = address of successful techs for this player
+        lw      t0, 0x0000(at)              // t0 = successful tech count
+        addiu   t0, t0, 0x0001              // increment
+        sw      t0, 0x0000(at)              // store updated tech count
+
         j       _end_2
         lw      ra, 0x001C(sp)          // load ra
 
@@ -176,6 +187,16 @@ scope AirDodge {
         // check if they can even air dash
         jal     air_dash_initial_
         nop
+
+        // update air dodge counter
+        li      at, AirDodge.airdodge_count
+        lw      t0, 0x0084(a0)              // t0 = player struct
+        lbu     t0, 0x000D(t0)              // t0 = player index (0 - 3)
+        sll     t0, t0, 0x0002              // t0 = player index * 4
+        addu    at, at, t0                  // at = address of successful techs for this player
+        lw      t0, 0x0000(at)              // t0 = successful tech count
+        addiu   t0, t0, 0x0001              // increment
+        sw      t0, 0x0000(at)              // store updated tech count
 
         _end:
         lw      ra, 0x001C(sp)          // ~
@@ -559,4 +580,11 @@ scope AirDodge {
         jr      ra                      // return
         addiu   sp, sp, 0x0018          // deallocate stack space
     }
+
+    airdodge_count:
+    dw  0x00  // p1
+    dw  0x00  // p2
+    dw  0x00  // p3
+    dw  0x00  // p4
+
 }
