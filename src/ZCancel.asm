@@ -35,6 +35,16 @@ scope ZCancel {
         _cruel_z_cancel_return:
         OS.patch_end()
 
+        li      at, ZCancel.z_cancel_status
+        lw      t8, 0x0160(v1)           // t8 = tics since last Z press
+        sw      t8, 0x0000(at)           // store tics since last Z press
+        addiu   t8, r0, 0                // ~
+        sb      t8, 0x0004(at)           // store z cancel success status bool (failed)
+        addiu   t8, r0, 1                // ~
+        sb      t8, 0x0005(at)           // store training mode check bool
+        lbu     t8, 0x000D(v1)           // t8 = player index (0 - 3)
+        sb      t8, 0x0006(at)           // store player index
+
         OS.read_word(Toggles.entry_punish_on_failed_z_cancel + 0x4, t8) // t8 = failed z cancel toggle
         beqz    t8, _end                 // branch if no extra punishment
         lw      t9, 0x0028(v1)           // original line 2
@@ -248,6 +258,16 @@ scope ZCancel {
         nop
 
         _z_cancel_success:
+        li      at, ZCancel.z_cancel_status
+        lw      t6, 0x0160(v1)          // t6 = tics since last Z press
+        sw      t6, 0x0000(at)          // store tics since last Z press
+        addiu   t6, r0, 1               // ~
+        sb      t6, 0x0004(at)          // store z cancel success status bool (success)
+        addiu   t6, r0, 1               // ~
+        sb      t6, 0x0005(at)          // store training mode check bool
+        lbu     t6, 0x000D(s1)          // t6 = player index (0 - 3)
+        sb      t6, 0x0006(at)          // store player index
+
         // bnezl   at, 0x80150AC0       // original line 1 (need to 'j' instead of 'b')
         j       0x80150AC0              // original line 1, modified
         lui     at, 0xC1A0              // original line 2
@@ -272,6 +292,10 @@ scope ZCancel {
     // @ Description
     // Makes sure egg lay file is present if Cruel Z-Cancel is set to Egg
     scope setup_: {
+        li      t8, ZCancel.z_cancel_status
+        sw      r0, 0x0000(t8)          // clear tics since last z
+        sw      r0, 0x0004(t8)          // clear status, landed & port bytes
+
         OS.read_word(Toggles.entry_punish_on_failed_z_cancel + 0x4, t8) // t8 = failed z cancel toggle
         lli     t0, _cruel_z_cancel.CRUEL_Z_CANCEL_MODE.EGG
         beq     t0, t8, _load_egg_file  // if egg, load file
@@ -293,6 +317,12 @@ scope ZCancel {
         nop
     }
 
+    z_cancel_status:
+    dw  0x00 // tics since last z
+    db  0 // success or failed bool
+    db  0 // just landed bool, gets checked and reset in Training.asm
+    db  0 // port
+    OS.align(4)
 }
 
 }
