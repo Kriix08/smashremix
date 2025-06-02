@@ -36,7 +36,7 @@ scope WallTeching {
         sw      at, 0x09E4(s0)          // update collision pointer
         sw      r0, 0x09DC(s0)          // remove interrupt routine
 
-        li      at, WallTeching.successful_techs
+        li      at, VsStats.successful_techs
         lbu     t6, 0x000D(s0)          // t6 = player index (0 - 3)
         sll     t6, t6, 0x0002          // t6 = player index * 4
         addu    at, at, t6              // at = address of successful techs for this player
@@ -46,7 +46,7 @@ scope WallTeching {
         sw      t6, 0x0000(at)          // store updated tech count
 
         _fail:
-        li      at, WallTeching.missed_techs
+        li      at, VsStats.missed_techs
         lbu     t6, 0x000D(s0)          // t6 = player index (0 - 3)
         sll     t6, t6, 0x0002          // t6 = player index * 4
         addu    at, at, t6              // at = address of missed techs for this player
@@ -66,7 +66,7 @@ scope WallTeching {
         _return:
         OS.patch_end()
 
-        li      at, WallTeching.successful_techs
+        li      at, VsStats.successful_techs
         lbu     t8, 0x000D(t7)              // t8 = player index (0 - 3)
         sll     t8, t8, 0x0002              // t8 = player index * 4
         addu    at, at, t8                  // at = address of successful techs for this player
@@ -86,7 +86,7 @@ scope WallTeching {
         _return:
         OS.patch_end()
 
-        li      at, WallTeching.successful_techs
+        li      at, VsStats.successful_techs
         lbu     t8, 0x000D(t7)              // t8 = player index (0 - 3)
         sll     t8, t8, 0x0002              // t8 = player index * 4
         addu    at, at, t8                  // at = address of successful techs for this player
@@ -114,7 +114,7 @@ scope WallTeching {
         nop
 
         _branch:
-        li      at, WallTeching.missed_techs
+        li      at, VsStats.missed_techs
         lw      t8, 0x0084(a0)              // t8 = player struct
         lbu     t8, 0x000D(t8)              // t8 = player index (0 - 3)
         sll     t8, t8, 0x0002              // t8 = player index * 4
@@ -124,17 +124,5 @@ scope WallTeching {
         j       0x801446EC                  // jump to end of routine
         sw      t8, 0x0000(at)              // store updated tech count
     }
-
-    successful_techs:
-    dw  0x00    // p1
-    dw  0x00    // p2
-    dw  0x00    // p3
-    dw  0x00    // p4
-
-    missed_techs:
-    dw  0x00    // p1
-    dw  0x00    // p2
-    dw  0x00    // p3
-    dw  0x00    // p4
 
 }
