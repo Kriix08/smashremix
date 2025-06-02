@@ -15,7 +15,7 @@ scope WallTeching {
         beqz    at, _end
         lw      t6, 0x0160(s0)          // t6 = frames since z pressed
         slti    t6, t6, 0x0014          // t6 = 0 if frames since z pressed > 0x14(20)
-        beq     t6, r0, _fail           // end if frames sinze z pressed > 20
+        beq     t6, r0, _fail           // end if frames since z pressed > 20
         nop
 
         // if we're here, start a wall tech

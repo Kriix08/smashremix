@@ -1067,55 +1067,55 @@ scope VsStats {
         sw      ra, 0x0004(sp)              // save ra
 
         li      t8, VsStats.successful_z_cancels
-        sw      r0, 0x0000(t8)          // clear p1 count
-        sw      r0, 0x0004(t8)          // clear p2 count
-        sw      r0, 0x0008(t8)          // clear p3 count
-        sw      r0, 0x000C(t8)          // clear p4 count
+        sw      r0, 0x0000(t8)              // clear p1 count
+        sw      r0, 0x0004(t8)              // clear p2 count
+        sw      r0, 0x0008(t8)              // clear p3 count
+        sw      r0, 0x000C(t8)              // clear p4 count
         li      t8, VsStats.missed_z_cancels
-        sw      r0, 0x0000(t8)          // clear p1 count
-        sw      r0, 0x0004(t8)          // clear p2 count
-        sw      r0, 0x0008(t8)          // clear p3 count
-        sw      r0, 0x000C(t8)          // clear p4 count
+        sw      r0, 0x0000(t8)              // clear p1 count
+        sw      r0, 0x0004(t8)              // clear p2 count
+        sw      r0, 0x0008(t8)              // clear p3 count
+        sw      r0, 0x000C(t8)              // clear p4 count
         li      t8, VsStats.successful_techs
-        sw      r0, 0x0000(t8)          // clear p1 count
-        sw      r0, 0x0004(t8)          // clear p2 count
-        sw      r0, 0x0008(t8)          // clear p3 count
-        sw      r0, 0x000C(t8)          // clear p4 count
+        sw      r0, 0x0000(t8)              // clear p1 count
+        sw      r0, 0x0004(t8)              // clear p2 count
+        sw      r0, 0x0008(t8)              // clear p3 count
+        sw      r0, 0x000C(t8)              // clear p4 count
         li      t8, VsStats.missed_techs
-        sw      r0, 0x0000(t8)          // clear p1 count
-        sw      r0, 0x0004(t8)          // clear p2 count
-        sw      r0, 0x0008(t8)          // clear p3 count
-        sw      r0, 0x000C(t8)          // clear p4 count
+        sw      r0, 0x0000(t8)              // clear p1 count
+        sw      r0, 0x0004(t8)              // clear p2 count
+        sw      r0, 0x0008(t8)              // clear p3 count
+        sw      r0, 0x000C(t8)              // clear p4 count
         li      t8, VsStats.ledges_grabbed
-        sw      r0, 0x0000(t8)          // clear p1 count
-        sw      r0, 0x0004(t8)          // clear p2 count
-        sw      r0, 0x0008(t8)          // clear p3 count
-        sw      r0, 0x000C(t8)          // clear p4 count
+        sw      r0, 0x0000(t8)              // clear p1 count
+        sw      r0, 0x0004(t8)              // clear p2 count
+        sw      r0, 0x0008(t8)              // clear p3 count
+        sw      r0, 0x000C(t8)              // clear p4 count
         li      t8, VsStats.airdodge_counter
-        sw      r0, 0x0000(t8)          // clear p1 count
-        sw      r0, 0x0004(t8)          // clear p2 count
-        sw      r0, 0x0008(t8)          // clear p3 count
-        sw      r0, 0x000C(t8)          // clear p4 count
+        sw      r0, 0x0000(t8)              // clear p1 count
+        sw      r0, 0x0004(t8)              // clear p2 count
+        sw      r0, 0x0008(t8)              // clear p3 count
+        sw      r0, 0x000C(t8)              // clear p4 count
         li      t8, VsStats.usp_counter
-        sw      r0, 0x0000(t8)          // clear p1 count
-        sw      r0, 0x0004(t8)          // clear p2 count
-        sw      r0, 0x0008(t8)          // clear p3 count
-        sw      r0, 0x000C(t8)          // clear p4 count
+        sw      r0, 0x0000(t8)              // clear p1 count
+        sw      r0, 0x0004(t8)              // clear p2 count
+        sw      r0, 0x0008(t8)              // clear p3 count
+        sw      r0, 0x000C(t8)              // clear p4 count
         li      t8, VsStats.nsp_counter
-        sw      r0, 0x0000(t8)          // clear p1 count
-        sw      r0, 0x0004(t8)          // clear p2 count
-        sw      r0, 0x0008(t8)          // clear p3 count
-        sw      r0, 0x000C(t8)          // clear p4 count
+        sw      r0, 0x0000(t8)              // clear p1 count
+        sw      r0, 0x0004(t8)              // clear p2 count
+        sw      r0, 0x0008(t8)              // clear p3 count
+        sw      r0, 0x000C(t8)              // clear p4 count
         li      t8, VsStats.dsp_counter
-        sw      r0, 0x0000(t8)          // clear p1 count
-        sw      r0, 0x0004(t8)          // clear p2 count
-        sw      r0, 0x0008(t8)          // clear p3 count
-        sw      r0, 0x000C(t8)          // clear p4 count
+        sw      r0, 0x0000(t8)              // clear p1 count
+        sw      r0, 0x0004(t8)              // clear p2 count
+        sw      r0, 0x0008(t8)              // clear p3 count
+        sw      r0, 0x000C(t8)              // clear p4 count
         li      t8, VsStats.grab_counter
-        sw      r0, 0x0000(t8)          // clear p1 count
-        sw      r0, 0x0004(t8)          // clear p2 count
-        sw      r0, 0x0008(t8)          // clear p3 count
-        sw      r0, 0x000C(t8)          // clear p4 count
+        sw      r0, 0x0000(t8)              // clear p1 count
+        sw      r0, 0x0004(t8)              // clear p2 count
+        sw      r0, 0x0008(t8)              // clear p3 count
+        sw      r0, 0x000C(t8)              // clear p4 count
 
         _end:
         lw      ra, 0x0004(sp)              // restore ra
@@ -1158,28 +1158,28 @@ scope VsStats {
     dw  0x00 // p4
 
     successful_techs:
-    dw  0x00    // p1
-    dw  0x00    // p2
-    dw  0x00    // p3
-    dw  0x00    // p4
+    dw  0x00 // p1
+    dw  0x00 // p2
+    dw  0x00 // p3
+    dw  0x00 // p4
 
     missed_techs:
-    dw  0x00    // p1
-    dw  0x00    // p2
-    dw  0x00    // p3
-    dw  0x00    // p4
+    dw  0x00 // p1
+    dw  0x00 // p2
+    dw  0x00 // p3
+    dw  0x00 // p4
 
     ledges_grabbed:
-    dw  0x00  // p1
-    dw  0x00  // p2
-    dw  0x00  // p3
-    dw  0x00  // p4
+    dw  0x00 // p1
+    dw  0x00 // p2
+    dw  0x00 // p3
+    dw  0x00 // p4
 
     airdodge_counter:
-    dw  0x00  // p1
-    dw  0x00  // p2
-    dw  0x00  // p3
-    dw  0x00  // p4
+    dw  0x00 // p1
+    dw  0x00 // p2
+    dw  0x00 // p3
+    dw  0x00 // p4
 
     usp_counter:
     dw  0x00 // p1
