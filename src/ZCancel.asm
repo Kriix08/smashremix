@@ -35,7 +35,7 @@ scope ZCancel {
         _cruel_z_cancel_return:
         OS.patch_end()
 
-        li      at, ZCancel.missed_z_cancels
+        li      at, VsStats.missed_z_cancels
         lbu     t8, 0x000D(v1)              // t8 = player index (0 - 3)
         sll     t8, t8, 0x0002              // t8 = player index * 4
         addu    at, at, t8                  // at = address of missed z-cancels for this player
@@ -257,7 +257,7 @@ scope ZCancel {
 
         _z_cancel_success:
         // bnezl   at, 0x80150AC0       // original line 1 (need to 'j' instead of 'b')
-        li      at, ZCancel.successful_z_cancels
+        li      at, VsStats.successful_z_cancels
         lbu     t6, 0x000D(s1)              // t6 = player index (0 - 3)
         sll     t6, t6, 0x0002              // t6 = player index * 4
         addu    at, at, t6                  // at = address of successful z-cancels for this player
@@ -309,17 +309,6 @@ scope ZCancel {
         nop
     }
 
-    missed_z_cancels:
-    dw  0x00 // p1
-    dw  0x00 // p2
-    dw  0x00 // p3
-    dw  0x00 // p4
-
-    successful_z_cancels:
-    dw  0x00 // p1
-    dw  0x00 // p2
-    dw  0x00 // p3
-    dw  0x00 // p4
 }
 
 }

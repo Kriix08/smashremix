@@ -181,7 +181,7 @@ scope AirDodge {
         nop
 
         // update air dodge counter
-        li      at, AirDodge.airdodge_count
+        li      at, VsStats.airdodge_counter
         lw      t0, 0x0084(a0)              // t0 = player struct
         lbu     t0, 0x000D(t0)              // t0 = player index (0 - 3)
         sll     t0, t0, 0x0002              // t0 = player index * 4
@@ -199,7 +199,7 @@ scope AirDodge {
         nop
 
         // update air dodge counter
-        li      at, AirDodge.airdodge_count
+        li      at, VsStats.airdodge_counter
         lw      t0, 0x0084(a0)              // t0 = player struct
         lbu     t0, 0x000D(t0)              // t0 = player index (0 - 3)
         sll     t0, t0, 0x0002              // t0 = player index * 4
@@ -590,11 +590,5 @@ scope AirDodge {
         jr      ra                      // return
         addiu   sp, sp, 0x0018          // deallocate stack space
     }
-
-    airdodge_count:
-    dw  0x00  // p1
-    dw  0x00  // p2
-    dw  0x00  // p3
-    dw  0x00  // p4
 
 }

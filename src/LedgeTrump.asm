@@ -88,7 +88,7 @@ scope LedgeTrump {
         OS.patch_end()
 
         sw      t3, 0x0064(s1)          // og line 2
-        li      s1, LedgeTrump.ledges_grabbed
+        li      s1, VsStats.ledges_grabbed
         lbu     v0, 0x000D(v0)          // v0 = player index (0 - 3)
         sll     v0, v0, 0x0002          // v0 = player index * 4
         addu    s1, s1, v0              // s1 = address of ledge grab count for this player
@@ -97,11 +97,5 @@ scope LedgeTrump {
         j       _return
         sw      v0, 0x0000(s1)          // store updated ledge grab count
     }
-
-    ledges_grabbed:
-    dw  0x00    // p1
-    dw  0x00    // p2
-    dw  0x00    // p3
-    dw  0x00    // p4
 
 }
