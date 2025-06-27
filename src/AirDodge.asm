@@ -540,7 +540,7 @@ scope AirDodge {
     scope movement_: {
         // 0x180 in player struct = temp variable 2
         addiu   sp, sp,-0x0030          // allocate stack space
-        sw    	ra, 0x0014(sp)          // ra
+        sw      ra, 0x0014(sp)          // ra
         lw      t0, 0x0084(a0)          // t0 = player struct
         lw      t1, 0x0180(t0)          // t1 = temp variable 2
         beqz    t1, _end                // skip if temp variable 2 = 0
@@ -561,7 +561,7 @@ scope AirDodge {
         _end:
         lw      ra, 0x0014(sp)          //  ra
         jr      ra                      // return
-        addiu 	sp, sp, 0x0030          // deallocate stack space
+        addiu   sp, sp, 0x0030          // deallocate stack space
     }
 
     // @ Description
