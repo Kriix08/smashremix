@@ -3014,6 +3014,16 @@ scope Character {
         OS.align(4)
     }
 
+	// @ Description
+	// This table stores Yoshi egg colors, used if not vanilla color or matching costume
+	scope yoshi_egg_color {
+		OS.align(4)
+		table:
+		constant TABLE_ORIGIN(origin())
+		fill (Character.NUM_CHARACTERS * 0x2)
+		OS.align(4)
+	}
+
     // @ Description
     // Replacement for shared actions
     // Use when an action that is usually shared should have unique function slots
