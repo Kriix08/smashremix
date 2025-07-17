@@ -343,6 +343,12 @@ scope Character {
         dw      costume_shield_color.{parent} // default to parent
         OS.patch_end()
 
+        // set rare death fgm to null
+        table_patch_start(rare_death_fgm, id.{name}, 0x4)
+        dh      0x2B7   // FGM id (null)
+        dh      0       // 0 chance
+        OS.patch_end()
+
         // Handle Polygons
         if {variant_type} == variant_type.POLYGON {
             // Set Kirby hat_id to none
@@ -3324,6 +3330,82 @@ scope Character {
         addiu   sp, sp, 0x0018              // deallocate stack space
         jr      ra                          // return
         nop
+    }
+
+    // @ Description
+    // This table contains FGM id's and 1/X chances for character rare death sounds
+    // 0x2B7 = NULL FGM ID, used for anyone without a rare death fgm
+    scope rare_death_fgm {
+        OS.align(16)
+        table:
+        constant TABLE_ORIGIN(origin())
+        // FGM id       // Chance
+        dh 0x02B7;      dh OS.NULL            // 0x00 - MARIO
+        dh 0x02B7;      dh OS.NULL            // 0x01 - FOX
+        dh 0x02B7;      dh OS.NULL            // 0x02 - DONKEY
+        dh 0x02B7;      dh OS.NULL            // 0x03 - SAMUS
+        dh 0x02B7;      dh OS.NULL            // 0x04 - LUIGI
+        dh 0x02B7;      dh OS.NULL            // 0x05 - LINK
+        dh 0x02B7;      dh OS.NULL            // 0x06 - YOSHI
+        dh 0x02B7;      dh OS.NULL            // 0x07 - CAPTAIN
+        dh 0x02B7;      dh OS.NULL            // 0x08 - KIRBY
+        dh 0x02B7;      dh OS.NULL            // 0x09 - PIKACHU
+        dh 0x02B7;      dh OS.NULL            // 0x0A - JIGGLY
+        dh 0x02B7;      dh OS.NULL            // 0x0B - NESS
+        dh 0x02B7;      dh OS.NULL            // 0x0C - BOSS
+        dh 0x02B7;      dh OS.NULL            // 0x0D - METAL
+        dh 0x02B7;      dh OS.NULL            // 0x0E - NMARIO
+        dh 0x02B7;      dh OS.NULL            // 0x0F - NFOX
+        dh 0x02B7;      dh OS.NULL            // 0x10 - NDONKEY
+        dh 0x02B7;      dh OS.NULL            // 0x11 - NSAMUS
+        dh 0x02B7;      dh OS.NULL            // 0x12 - NLUIGI
+        dh 0x02B7;      dh OS.NULL            // 0x13 - NLINK
+        dh 0x02B7;      dh OS.NULL            // 0x14 - NYOSHI
+        dh 0x02B7;      dh OS.NULL            // 0x15 - NCAPTAIN
+        dh 0x02B7;      dh OS.NULL            // 0x16 - NKIRBY
+        dh 0x02B7;      dh OS.NULL            // 0x17 - NPIKACHU
+        dh 0x02B7;      dh OS.NULL            // 0x18 - NJIGGLY
+        dh 0x02B7;      dh OS.NULL            // 0x19 - NNESS
+        dh 0x02B7;      dh OS.NULL            // 0x1A - GDONKEY
+        fill table + (NUM_CHARACTERS * 4) - pc()
+        // pad table for new characters
+
+        // @ Description
+        // Modifies function ftCommonDeadInitStatusVars to use a character's rare death sound by chance if set
+        scope check_rare_death_fgm: {
+            OS.patch_start(0xB6BCC, 0x8013C18C)
+            j       check_rare_death_fgm
+            nop
+            _return:
+            OS.patch_end()
+            // s0 = player object
+            // s1 = player struct
+
+            lw      t0, 0x09C8(s0)          // t0 = character regular death FGM array
+            lw      at, 0x0008(s1)          // at = character id
+            sll     at, at, 0x0002          // at = character id * 4
+            li      t2, rare_death_fgm.table
+            addu    t2, t2, at              // t2 = address of rare death FGM entry for this character
+            lhu     at, 0x0000(t2)          // at = rare death FGM id
+            addiu   a0, r0, 0x02B7          // a0 = NULL fgm id
+            beql    at, a0, _end            // branch if no rare death FGM
+            lhu     a0, 0x00B4(t0)          // a0 = regular death FGM id
+
+            // if we're here, then the character has a rare death FGM
+            jal     Global.get_random_int_
+            lhu     a0, 0x0002(t2)          // a0 = rare death FGM chance
+            bnezl   v0, _end      	        // if not 0, play regular FGM
+            lhu     a0, 0x00B4(t0)          // a0 = regular death FGM id
+
+            // if we're here, that means the random number == 0, so play rare death FGM instead
+            lhu     a0, 0x0000(t2)          // a0 = rare death FGM id
+
+            _end:
+            jal     0x8013BC60              // original line 1 (queue death FGM)
+            nop
+            j       _return
+            nop
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
