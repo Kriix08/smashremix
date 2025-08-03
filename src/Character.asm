@@ -3316,11 +3316,10 @@ scope Character {
             nop
             _return:
             OS.patch_end()
-            // s0 = player object
-            // s1 = player struct
+            // s0 = player struct
 
-            lw      t0, 0x09C8(s0)          // t0 = character regular death FGM array
-            lw      at, 0x0008(s1)          // at = character id
+            lw      t0, 0x09C8(s0)          // t0 = character attributes
+            lw      at, 0x0008(s0)          // at = character id
             sll     at, at, 0x0002          // at = character id * 4
             li      t2, rare_death_fgm.table
             addu    t2, t2, at              // t2 = address of rare death FGM entry for this character
@@ -3339,7 +3338,7 @@ scope Character {
             lhu     a0, 0x0000(t2)          // a0 = rare death FGM id
 
             _end:
-            jal     0x8013BC60              // original line 1 (queue death FGM)
+            jal     0x8013BC60              // original line 1
             nop
             j       _return
             nop
